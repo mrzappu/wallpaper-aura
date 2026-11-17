@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload 4K Wallpaper | Wallpaper Aura</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand-logo">
+                <span class="brand-icon"><i class="fa-solid fa-sparkles"></i></span>
+                <span class="brand-text">WALLPAPER<span class="accent-text">AURA</span></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="index.html" class="nav-tab-btn">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Explore</span>
+                </a>
+                <a href="profile.html" class="nav-tab-btn">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Upload Page Main Content -->
+    <main class="main-container" style="max-width: 760px; padding-top: 3rem;">
+        <div style="margin-bottom: 2rem;">
+            <a href="index.html" style="color:var(--text-secondary); text-decoration:none; font-size:0.88rem; display:inline-flex; align-items:center; gap:0.4rem; margin-bottom:1rem;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Gallery
+            </a>
+            <h1 style="font-family:var(--font-heading); font-size: 2rem; font-weight:700;">Publish 4K Wallpaper</h1>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">Upload master wallpapers to the community collection.</p>
+        </div>
+
+        <div class="upload-modal-card" style="max-width: 100%; padding: 2rem; margin: 0 auto; box-shadow: var(--shadow-card);">
+            <form id="standaloneUploadForm">
+                <!-- Dropzone -->
+                <div class="drop-zone" id="dropZone">
+                    <input type="file" id="fileInput" accept="image/*" class="file-input-hidden">
+                    <div class="drop-zone-prompt" id="dropPrompt">
+                        <i class="fa-regular fa-image drop-icon"></i>
+                        <p class="drop-text">Drag & drop your 4K wallpaper or <span class="highlight">browse</span></p>
+                        <span class="drop-hint">Supports PNG, JPG, WEBP (Minimum 1920x1080 recommended)</span>
+                    </div>
+                    <div class="image-preview-box hidden" id="uploadPreviewBox">
+                        <img src="" id="uploadPreviewImg" alt="Upload Preview">
+                        <button type="button" class="remove-upload-img" id="removeUploadImgBtn" title="Remove image">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="or-separator"><span>OR ENTER DIRECT IMAGE URL</span></div>
+                <div class="form-group">
+                    <input type="url" id="wallpaperUrlInput" placeholder="https://images.unsplash.com/... (optional)">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="wallpaperTitle">Wallpaper Title</label>
+                        <input type="text" id="wallpaperTitle" placeholder="e.g. Nordic Winter Fog" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="wallpaperCategory">Category</label>
+                        <select id="wallpaperCategory" required></select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="wallpaperRes">Resolution Tier</label>
+                        <select id="wallpaperRes"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="wallpaperTags">Tags (comma separated)</label>
+                        <input type="text" id="wallpaperTags" placeholder="nature, mountains, calm, 4k">
+                    </div>
+                </div>
+
+                <div class="form-footer" style="margin-top: 1.5rem;">
+                    <a href="index.html" class="btn-secondary" style="text-decoration:none;">Cancel</a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i> Publish Wallpaper
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div>&copy; 2026 Wallpaper Aura. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script src="db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await DB.init();
+
+            // Populate categories
+            const catSelect = document.getElementById('wallpaperCategory');
+            const categories = DB.getCategories();
+            catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            // Populate resolutions
+            const resSelect = document.getElementById('wallpaperRes');
+            const resolutions = DB.getResolutions();
+            resSelect.innerHTML = resolutions.map(r => `<option value="${r.label}">${r.label} (${r.dimensions})</option>`).join('');
+
+            // Dropzone logic
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const dropPrompt = document.getElementById('dropPrompt');
+            const uploadPreviewBox = document.getElementById('uploadPreviewBox');
+            const uploadPreviewImg = document.getElementById('uploadPreviewImg');
+            const removeBtn = document.getElementById('removeUploadImgBtn');
+            let dataUrl = null;
+
+            function handleFile(file) {
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    dataUrl = e.target.result;
+                    uploadPreviewImg.src = dataUrl;
+                    dropPrompt.classList.add('hidden');
+                    uploadPreviewBox.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+            });
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFile(e.target.files[0]);
+            });
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dataUrl = null;
+                fileInput.value = '';
+                uploadPreviewImg.src = '';
+                dropPrompt.classList.remove('hidden');
+                uploadPreviewBox.classList.add('hidden');
+            });
+
+            // Form Submit
+            const form = document.getElementById('standaloneUploadForm');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const directUrl = document.getElementById('wallpaperUrlInput').value.trim();
+                const finalImg = directUrl || dataUrl;
+
+                if (!finalImg) {
+                    alert('Please select an image file or provide an image URL.');
+                    return;
+                }
+
+                const title = document.getElementById('wallpaperTitle').value.trim();
+                const category = catSelect.value;
+                const res = resSelect.value;
+                const tagsRaw = document.getElementById('wallpaperTags').value.trim();
+                const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim().toLowerCase()) : [category.toLowerCase(), '4k'];
+
+                const user = DB.getCurrentUser();
+                const author = user ? user.name : 'Community Creator';
+                const authorEmail = user ? user.email : 'creator@gmail.com';
+
+                const newWall = {
+                    id: 'wall-' + Date.now(),
+                    title: title,
+                    category: category,
+                    resolution: res,
+                    dimensions: '3840 x 2160',
+                    imageUrl: finalImg,
+                    author: author,
+                    authorEmail: authorEmail,
+                    likes: 1,
+                    downloads: 0,
+                    tags: tags,
+                    createdAt: new Date().toISOString().split('T')[0]
+                };
+
+                DB.addWallpaper(newWall);
+                alert(`Wallpaper "${title}" published successfully!`);
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

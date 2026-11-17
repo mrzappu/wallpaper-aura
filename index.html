@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallpaper Aura | Free 4K & Ultra HD Desktop Wallpapers</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <!-- Clean Standard Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand-logo">
+                <span class="brand-icon"><i class="fa-solid fa-sparkles"></i></span>
+                <span class="brand-text">WALLPAPER<span class="accent-text">AURA</span></span>
+            </a>
+
+            <!-- Search Box -->
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search wallpapers by title, tags, or category...">
+                <button class="clear-search-btn" id="clearSearchBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="nav-actions">
+                <a href="index.html" class="nav-tab-btn active">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Explore</span>
+                </a>
+
+                <!-- Upload 4K Button: Visible ONLY to Admins -->
+                <a href="upload.html" class="upload-btn hidden" id="adminUploadBtn" title="Admin Wallpaper Upload">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    <span>Upload 4K</span>
+                </a>
+
+                <!-- Auth Section (Google Login / Profile) -->
+                <div class="auth-section" id="authSection">
+                    <button class="google-login-btn" id="googleLoginBtn">
+                        <svg class="google-icon" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Sign In</span>
+                    </button>
+                    
+                    <!-- User Profile Pill -->
+                    <a href="profile.html" class="user-profile-pill hidden" id="userProfilePill" title="View Profile & Download History">
+                        <img src="" alt="Avatar" id="userAvatar" class="user-avatar">
+                        <div class="user-info">
+                            <span class="user-name" id="userName">User</span>
+                            <span class="user-badge" id="userRoleBadge">Profile</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Free 4K & Ultra HD Wallpaper Archive</h1>
+                <p class="hero-subtitle">High-fidelity wallpapers for desktop and mobile displays. Completely free for everyone.</p>
+                
+                <div class="quick-stats">
+                    <div class="stat-item">
+                        <span class="stat-num" id="totalWallpapersCount">0</span>
+                        <span class="stat-label">Wallpapers</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num">4K / 8K</span>
+                        <span class="stat-label">True UHD</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num" id="totalDownloadsCount">0</span>
+                        <span class="stat-label">Downloads</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Controls & Dynamic Categories -->
+        <section class="main-container">
+            <div class="controls-bar">
+                <!-- Dynamically populated from database -->
+                <div class="category-tabs" id="categoryTabs"></div>
+
+                <div class="filters-subgroup">
+                    <div class="filter-dropdown">
+                        <label for="resolutionFilter"><i class="fa-solid fa-display"></i> Resolution:</label>
+                        <select id="resolutionFilter">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="filter-dropdown">
+                        <label for="sortSelect"><i class="fa-solid fa-arrow-down-wide-short"></i> Sort:</label>
+                        <select id="sortSelect">
+                            <option value="trending">Trending</option>
+                            <option value="latest">Newest</option>
+                            <option value="likes">Most Liked</option>
+                            <option value="downloads">Most Downloaded</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallpaper Grid -->
+            <div class="gallery-grid" id="galleryGrid"></div>
+
+            <div class="no-results hidden" id="noResults">
+                <i class="fa-regular fa-image empty-icon"></i>
+                <h3>No wallpapers found</h3>
+                <p>Try searching for a different keyword or category.</p>
+                <button class="btn-secondary" id="resetFiltersBtn">Reset Filters</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Wallpaper Preview & 4K Download Modal -->
+    <div class="modal-overlay hidden" id="previewModal">
+        <div class="preview-modal-card">
+            <button class="close-modal-btn" id="closePreviewBtn"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="preview-image-wrapper">
+                <img src="" alt="Wallpaper Preview" id="modalImage">
+                <div class="image-overlay-tags" id="modalResolutionBadge">4K UHD</div>
+                <button class="fullscreen-view-btn" id="viewFullscreenBtn" title="Open full resolution in new tab">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="preview-info-panel">
+                <div class="modal-header-info">
+                    <h2 id="modalTitle">Wallpaper Title</h2>
+                    <div class="creator-badge">
+                        <img src="" id="modalAuthorAvatar" class="author-avatar" alt="Author">
+                        <div>
+                            <span class="author-name" id="modalAuthor">Uploader</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-meta-grid">
+                    <div class="meta-box">
+                        <span class="meta-label">Native Resolution</span>
+                        <span class="meta-val" id="modalResValue">3840 x 2160</span>
+                    </div>
+                    <div class="meta-box">
+                        <span class="meta-label">Category</span>
+                        <span class="meta-val" id="modalCategory">Nature</span>
+                    </div>
+                    <div class="meta-box">
+                        <span class="meta-label">Downloads</span>
+                        <span class="meta-val" id="modalDownloads">0</span>
+                    </div>
+                    <div class="meta-box">
+                        <span class="meta-label">Favorites</span>
+                        <span class="meta-val" id="modalLikes">0</span>
+                    </div>
+                </div>
+
+                <div class="modal-tags" id="modalTagsContainer"></div>
+
+                <!-- Multi-Resolution Download Options (Dynamically Rendered) -->
+                <div class="download-tier-box">
+                    <span class="download-tier-title"><i class="fa-solid fa-download"></i> Select Download Resolution:</span>
+                    <div class="resolution-options-grid" id="modalResOptionsGrid">
+                        <!-- Populated dynamically from DB.getResolutions() -->
+                    </div>
+                </div>
+
+                <div class="modal-action-buttons">
+                    <button class="like-action-btn" id="modalLikeBtn">
+                        <i class="fa-regular fa-heart"></i>
+                        <span id="modalLikeText">Favorite</span>
+                    </button>
+                    <button class="download-action-btn" id="modalDownloadBtn">
+                        <i class="fa-solid fa-download"></i>
+                        <span id="modalDownloadLabel">Download Free (4K)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Login Modal -->
+    <div class="modal-overlay hidden" id="googleModal">
+        <div class="google-modal-card">
+            <div class="google-header">
+                <svg class="google-logo-large" viewBox="0 0 24 24" width="36" height="36">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <h3>Sign in with Google</h3>
+                <button class="close-modal-btn" id="closeGoogleModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="google-body">
+                <p class="google-desc" id="googleModalSubtitle">
+                    Sign in with Google to download wallpapers in 4K resolution and track your personal download history. Free forever.
+                </p>
+
+                <!-- Official Google Identity Button placeholder -->
+                <div id="g_id_signin_box" style="display:flex; justify-content:center; margin-bottom:1rem;"></div>
+
+                <form id="googleLoginForm" class="custom-account-inputs">
+                    <input type="text" id="googleLoginName" placeholder="Your Name (e.g. Adithyan)" required>
+                    <input type="email" id="googleLoginEmail" placeholder="Your Google Email (e.g. adithyan@gmail.com)" required>
+                    <button type="submit" class="btn-google-custom-login">
+                        Continue with Google
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Clean Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <strong>WALLPAPER AURA</strong> — Free 4K & Ultra HD Desktop Wallpaper Archive
+            </div>
+            <div class="footer-links">
+                <a href="index.html" style="color:var(--text-secondary);text-decoration:none;margin-right:1rem;">Explore</a>
+                <a href="profile.html" style="color:var(--text-secondary);text-decoration:none;margin-right:1rem;">Profile</a>
+                <a href="admin.html" id="footerAdminLink" style="color:var(--text-muted);text-decoration:none;">Admin</a>
+            </div>
+            <div>&copy; 2026 Wallpaper Aura. Open source & free.</div>
+        </div>
+    </footer>
+
+    <script src="db.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

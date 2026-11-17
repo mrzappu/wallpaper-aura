@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile & Download History | Wallpaper Aura</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand-logo">
+                <span class="brand-icon"><i class="fa-solid fa-sparkles"></i></span>
+                <span class="brand-text">WALLPAPER<span class="accent-text">AURA</span></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="index.html" class="nav-tab-btn">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Explore</span>
+                </a>
+                <button class="btn-secondary" id="logoutBtn" style="padding: 0.45rem 1rem;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Profile Main Container -->
+    <main class="main-container" style="max-width: 1100px; padding-top: 3rem;">
+        <!-- User Info Header Box -->
+        <div class="admin-box-card" style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 2.5rem; flex-wrap:wrap; gap:1.5rem;">
+            <div style="display:flex; align-items:center; gap: 1.25rem;">
+                <img src="" id="profileAvatar" alt="Avatar" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-blue);">
+                <div>
+                    <h2 id="profileName" style="font-family:var(--font-heading); font-size:1.6rem; font-weight:700;">Google User</h2>
+                    <span id="profileEmail" style="color:var(--text-secondary); font-size:0.9rem;">user@gmail.com</span>
+                    <div style="margin-top: 0.35rem;">
+                        <span id="profileRoleBadge" class="admin-badge">Verified Member</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Access Button (shown only if admin) -->
+            <div id="adminAccessSection" class="hidden">
+                <a href="admin.html" class="btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;">
+                    <i class="fa-solid fa-sliders"></i> Open Admin Panel
+                </a>
+            </div>
+        </div>
+
+        <!-- Download History Section -->
+        <section style="margin-bottom: 3rem;">
+            <div class="table-header-bar" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+                <h3 style="font-size:1.15rem; font-weight:700;"><i class="fa-solid fa-clock-rotate-left"></i> Download History</h3>
+                <span class="box-desc" style="margin-bottom:0;">All 4K & Ultra HD wallpapers downloaded to your device</span>
+            </div>
+
+            <div class="admin-table-card" style="border-top:none; border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Preview</th>
+                                <th>Wallpaper Title</th>
+                                <th>Resolution</th>
+                                <th>Downloaded At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="downloadHistoryBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Favorited Wallpapers Section -->
+        <section>
+            <h3 style="font-size:1.25rem; font-family:var(--font-heading); font-weight:700; margin-bottom:1rem;">
+                <i class="fa-solid fa-heart" style="color:var(--accent-red);"></i> Saved Favorites
+            </h3>
+            <div class="gallery-grid" id="favoritesGrid">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div>&copy; 2026 Wallpaper Aura. User Account Center.</div>
+        </div>
+    </footer>
+
+    <script src="db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await DB.init();
+            const user = DB.getCurrentUser();
+
+            // If not logged in, redirect to index
+            if (!user) {
+                alert('Please sign in with Google to view your profile and download history.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Fill user info
+            document.getElementById('profileAvatar').src = user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120';
+            document.getElementById('profileName').textContent = user.name;
+            document.getElementById('profileEmail').textContent = user.email;
+
+            const isAdmin = DB.isAdmin(user.email);
+            if (isAdmin) {
+                document.getElementById('profileRoleBadge').innerHTML = '<i class="fa-solid fa-crown" style="color:#f59e0b"></i> Administrator';
+                document.getElementById('adminAccessSection').classList.remove('hidden');
+            }
+
+            // Render Download History
+            const historyBody = document.getElementById('downloadHistoryBody');
+            const downloads = DB.getUserDownloads(user.email);
+
+            if (downloads.length === 0) {
+                historyBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color:var(--text-muted);">No downloads recorded yet. Explore the gallery and download 4K wallpapers!</td></tr>`;
+            } else {
+                historyBody.innerHTML = downloads.map(h => `
+                    <tr>
+                        <td><img src="${h.imageUrl}" class="table-thumb" alt="${h.title}"></td>
+                        <td><strong>${h.title}</strong></td>
+                        <td><span class="res-tag">${h.resolution}</span></td>
+                        <td style="color:var(--text-muted); font-size:0.8rem;">${new Date(h.downloadedAt).toLocaleString()}</td>
+                        <td>
+                            <a href="${h.imageUrl}" target="_blank" download="${h.title}.jpg" class="btn-inline" style="text-decoration:none; padding:0.35rem 0.75rem; font-size:0.8rem;">
+                                <i class="fa-solid fa-download"></i> Re-download
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render Favorites
+            const favGrid = document.getElementById('favoritesGrid');
+            const allWalls = DB.getWallpapers();
+            const favIds = DB.getFavorites();
+            const favWalls = allWalls.filter(w => favIds.has(w.id));
+
+            if (favWalls.length === 0) {
+                favGrid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: var(--text-muted); background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">No favorites saved yet. Click the heart icon on any wallpaper in the gallery to save it here.</div>`;
+            } else {
+                favGrid.innerHTML = favWalls.map(w => `
+                    <div class="wallpaper-card">
+                        <div class="card-image-wrap">
+                            <img src="${w.imageUrl}" alt="${w.title}" class="card-img">
+                            <div class="card-badges">
+                                <span class="res-tag">${w.resolution}</span>
+                                <span class="category-tag">${w.category}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${w.title}</div>
+                            <div class="card-footer">
+                                <span>${w.author}</span>
+                                <a href="index.html" style="color:var(--accent-blue); text-decoration:none; font-size:0.82rem;">View in Gallery &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                DB.logout();
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>
