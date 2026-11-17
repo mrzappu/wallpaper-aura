@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile & Download History | Wallpaper Aura</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Distinct Font for Profile: Poppins & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="page-profile">
     <!-- Navbar -->
     <header class="navbar">
         <div class="nav-container">
@@ -20,10 +21,6 @@
             </a>
 
             <div class="nav-actions">
-                <a href="index.html" class="nav-tab-btn">
-                    <i class="fa-solid fa-compass"></i>
-                    <span>Explore</span>
-                </a>
                 <button class="btn-secondary" id="logoutBtn" style="padding: 0.45rem 1rem;">
                     <i class="fa-solid fa-right-from-bracket"></i> Sign Out
                 </button>
@@ -104,10 +101,10 @@
             await DB.init();
             const user = DB.getCurrentUser();
 
-            // If not logged in, redirect to index
+            // If not logged in, redirect to login page
             if (!user) {
                 alert('Please sign in with Google to view your profile and download history.');
-                window.location.href = 'index.html';
+                window.location.href = 'login.html';
                 return;
             }
 

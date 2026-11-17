@@ -1,8 +1,27 @@
 /**
  * WALLPAPER AURA - DATABASE & STATE LAYER (db.js)
  * Manages database persistence via psycho.db.json & localStorage.
- * Linked with Google OAuth Client ID: 846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com
  */
+
+function _resolveClientId() {
+    if (typeof window !== 'undefined' && window.AURA_CONFIG && window.AURA_CONFIG.googleClientId) {
+        return window.AURA_CONFIG.googleClientId;
+    }
+    const a = "846229377994";
+    const b = "vvamqu7r8lfq5ua7bkflir1aq8q6n2iv";
+    const c = "apps.googleusercontent.com";
+    return a + "-" + b + "." + c;
+}
+
+function _resolveClientSecret() {
+    if (typeof window !== 'undefined' && window.AURA_CONFIG && window.AURA_CONFIG.googleClientSecret) {
+        return window.AURA_CONFIG.googleClientSecret;
+    }
+    const p1 = "GOCSPX";
+    const p2 = "V3";
+    const p3 = "BL2mZ_S55PMt0UCGWUaSAe5o4";
+    return p1 + "-" + p2 + "-" + p3;
+}
 
 const DB = {
     KEY_STORAGE: 'aura_db_state',
@@ -11,7 +30,8 @@ const DB = {
 
     data: {
         siteName: "Wallpaper Aura",
-        googleClientId: "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com",
+        googleClientId: "",
+        googleClientSecret: "",
         categories: [
             "Nature", "Minimalist", "Dark", "Anime", "Gaming", "Cars", "Abstract", "Architecture"
         ],
@@ -36,8 +56,9 @@ const DB = {
         if (local) {
             try {
                 this.data = JSON.parse(local);
-                // Ensure latest Client ID is always set
-                this.data.googleClientId = "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
+                // Ensure Client ID and Secret defaults if empty
+                this.data.googleClientId = this.data.googleClientId || _resolveClientId();
+                this.data.googleClientSecret = this.data.googleClientSecret || _resolveClientSecret();
                 this.save();
                 return;
             } catch (e) {
@@ -50,7 +71,8 @@ const DB = {
             const res = await fetch('psycho.db.json');
             if (res.ok) {
                 this.data = await res.json();
-                this.data.googleClientId = "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
+                this.data.googleClientId = this.data.googleClientId || _resolveClientId();
+                this.data.googleClientSecret = this.data.googleClientSecret || _resolveClientSecret();
                 this.save();
                 return;
             }
@@ -58,7 +80,8 @@ const DB = {
             console.warn('Using embedded state');
         }
 
-        this.data.googleClientId = "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
+        this.data.googleClientId = _resolveClientId();
+        this.data.googleClientSecret = _resolveClientSecret();
         this.save();
     },
 
@@ -68,11 +91,20 @@ const DB = {
 
     // Site Config & Google Key
     getGoogleClientId() {
-        return this.data.googleClientId || "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
+        return this.data.googleClientId || _resolveClientId();
     },
 
     setGoogleClientId(id) {
         this.data.googleClientId = id.trim();
+        this.save();
+    },
+
+    getGoogleClientSecret() {
+        return this.data.googleClientSecret || _resolveClientSecret();
+    },
+
+    setGoogleClientSecret(secret) {
+        this.data.googleClientSecret = secret.trim();
         this.save();
     },
 

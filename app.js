@@ -32,12 +32,6 @@ const userProfilePill = document.getElementById('userProfilePill');
 const userAvatar = document.getElementById('userAvatar');
 const userName = document.getElementById('userName');
 const userRoleBadge = document.getElementById('userRoleBadge');
-const googleModal = document.getElementById('googleModal');
-const closeGoogleModalBtn = document.getElementById('closeGoogleModalBtn');
-const googleLoginForm = document.getElementById('googleLoginForm');
-const googleLoginName = document.getElementById('googleLoginName');
-const googleLoginEmail = document.getElementById('googleLoginEmail');
-const googleModalSubtitle = document.getElementById('googleModalSubtitle');
 
 // Preview Modal DOM
 const previewModal = document.getElementById('previewModal');
@@ -80,46 +74,49 @@ async function initApp() {
    ========================================================================== */
 function setupAuthUI() {
     const user = DB.getCurrentUser();
+    const saveSuggestionPopup = document.getElementById('saveSuggestionPopup');
+    const userSavedStatus = document.getElementById('userSavedStatus');
+    const modalAccountName = document.getElementById('modalAccountName');
+
     if (user) {
-        googleLoginBtn.classList.add('hidden');
-        userProfilePill.classList.remove('hidden');
-        userAvatar.src = user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100';
-        userName.textContent = user.name || 'User';
+        if (googleLoginBtn) googleLoginBtn.classList.add('hidden');
+        if (userProfilePill) userProfilePill.classList.remove('hidden');
+        if (userAvatar) userAvatar.src = user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100';
+        if (userName) userName.textContent = user.name || 'User';
         
         const isAdmin = DB.isAdmin(user.email);
-        userRoleBadge.textContent = isAdmin ? 'Admin' : 'Member';
+        if (userRoleBadge) userRoleBadge.textContent = isAdmin ? 'Admin' : 'Member';
 
         // Only show Upload button if user is Admin!
-        if (isAdmin) {
-            adminUploadBtn.classList.remove('hidden');
-        } else {
-            adminUploadBtn.classList.add('hidden');
+        if (adminUploadBtn) {
+            if (isAdmin) adminUploadBtn.classList.remove('hidden');
+            else adminUploadBtn.classList.add('hidden');
         }
+
+        if (saveSuggestionPopup) saveSuggestionPopup.classList.add('hidden');
+        if (userSavedStatus) userSavedStatus.classList.remove('hidden');
+        if (modalAccountName) modalAccountName.textContent = user.name || 'User';
     } else {
-        googleLoginBtn.classList.remove('hidden');
-        userProfilePill.classList.add('hidden');
-        adminUploadBtn.classList.add('hidden');
+        if (googleLoginBtn) googleLoginBtn.classList.remove('hidden');
+        if (userProfilePill) userProfilePill.classList.add('hidden');
+        if (adminUploadBtn) adminUploadBtn.classList.add('hidden');
+        if (saveSuggestionPopup) saveSuggestionPopup.classList.remove('hidden');
+        if (userSavedStatus) userSavedStatus.classList.add('hidden');
     }
 }
 
 /* Google Identity Services (GIS) integration */
 function setupGoogleIdentity() {
     const clientId = DB.getGoogleClientId();
-    if (clientId && window.google) {
+    if (clientId && window.google && window.google.accounts && window.google.accounts.id) {
         try {
             google.accounts.id.initialize({
                 client_id: clientId,
-                callback: handleGoogleCredentialResponse
+                callback: handleGoogleCredentialResponse,
+                auto_select: false
             });
-            const box = document.getElementById('g_id_signin_box');
-            if (box) {
-                google.accounts.id.renderButton(box, {
-                    theme: "outline",
-                    size: "large",
-                    text: "signin_with",
-                    shape: "pill"
-                });
-            }
+            // Prompt Google One-Tap
+            google.accounts.id.prompt();
         } catch (e) {
             console.log('Google Identity init error:', e);
         }
@@ -141,7 +138,6 @@ function handleGoogleCredentialResponse(response) {
         };
         DB.setCurrentUser(user);
         setupAuthUI();
-        googleModal.classList.add('hidden');
         showToast(`Signed in with Google as ${user.name}`, 'success');
 
         if (pendingDownloadAfterLogin) {
@@ -337,6 +333,25 @@ function openPreview(w) {
     renderModalResolutionOptions();
     updateModalLikeState();
 
+    const saveSuggestionPopup = document.getElementById('saveSuggestionPopup');
+    const userSavedStatus = document.getElementById('userSavedStatus');
+    const modalAccountName = document.getElementById('modalAccountName');
+    const user = DB.getCurrentUser();
+
+    if (user) {
+        if (saveSuggestionPopup) saveSuggestionPopup.classList.add('hidden');
+        if (userSavedStatus) {
+            userSavedStatus.classList.remove('hidden');
+            if (modalAccountName) modalAccountName.textContent = user.name || 'User';
+        }
+    } else {
+        if (saveSuggestionPopup) {
+            saveSuggestionPopup.classList.remove('hidden');
+            saveSuggestionPopup.classList.remove('highlight-pulse');
+        }
+        if (userSavedStatus) userSavedStatus.classList.add('hidden');
+    }
+
     previewModal.classList.remove('hidden');
 }
 
@@ -377,33 +392,33 @@ function updateModalLikeState() {
     modalLikes.textContent = formatNumber(activeWallpaperForModal.likes || 0);
 }
 
-// Download Button Trigger: Check Google Sign-In requirement
+// Download Button Trigger: 100% Free Instant Download
 modalDownloadBtn.addEventListener('click', () => {
     if (!activeWallpaperForModal) return;
-
-    const user = DB.getCurrentUser();
-    if (!user) {
-        // Prompt Google Sign-in!
-        googleModalSubtitle.textContent = "Please sign in with Google to download this wallpaper in 4K resolution. It is 100% free!";
-        pendingDownloadAfterLogin = true;
-        googleModal.classList.remove('hidden');
-        setTimeout(() => googleLoginName.focus(), 150);
-        return;
-    }
-
     executeDownload();
 });
 
 function executeDownload() {
     if (!activeWallpaperForModal) return;
     const user = DB.getCurrentUser();
-    const userEmail = user ? user.email : 'Guest';
     const resLabel = selectedResolutionObj ? selectedResolutionObj.label : '4K Ultra HD';
 
-    // Record into database
-    DB.recordDownload(activeWallpaperForModal, resLabel, userEmail);
+    // Increment download counter
+    DB.incrementDownload(activeWallpaperForModal.id);
 
-    showToast(`Downloading ${resLabel}...`, 'success');
+    if (user) {
+        // Record into user's personal download history
+        DB.recordDownload(activeWallpaperForModal, resLabel, user.email);
+        showToast(`📥 Downloading ${resLabel}! Saved to your profile history.`, 'success');
+    } else {
+        showToast(`📥 Downloading ${resLabel}! Tip: Sign in with Google to keep your history.`, 'info');
+        const savePopup = document.getElementById('saveSuggestionPopup');
+        if (savePopup) {
+            savePopup.classList.add('highlight-pulse');
+            setTimeout(() => savePopup.classList.remove('highlight-pulse'), 3000);
+        }
+    }
+
     modalDownloads.textContent = formatNumber(activeWallpaperForModal.downloads || 0);
     updateHeaderStats();
 
@@ -482,59 +497,21 @@ function setupEventListeners() {
         renderGallery();
     });
 
-    // Google Modal Handlers
-    googleLoginBtn.addEventListener('click', () => {
-        googleModalSubtitle.textContent = "Sign in with Google to download wallpapers in 4K resolution and track your personal download history. Free forever.";
-        pendingDownloadAfterLogin = false;
-        googleModal.classList.remove('hidden');
-        setTimeout(() => googleLoginName.focus(), 150);
-    });
-
-    closeGoogleModalBtn.addEventListener('click', () => {
-        googleModal.classList.add('hidden');
-        pendingDownloadAfterLogin = false;
-    });
-
-    googleLoginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = googleLoginName.value.trim() || 'Google User';
-        const email = googleLoginEmail.value.trim().toLowerCase();
-
-        const user = {
-            name: name,
-            email: email,
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
-        };
-
-        DB.setCurrentUser(user);
-        setupAuthUI();
-        googleModal.classList.add('hidden');
-        showToast(`Signed in as ${user.name}`, 'success');
-
-        if (pendingDownloadAfterLogin) {
-            pendingDownloadAfterLogin = false;
-            executeDownload();
-        }
-    });
-
+    // Close Preview Modal Handlers
     closePreviewBtn.addEventListener('click', () => {
         previewModal.classList.add('hidden');
     });
 
-    // Close Modals on background click
-    [previewModal, googleModal].forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
+    previewModal.addEventListener('click', (e) => {
+        if (e.target === previewModal) {
+            previewModal.classList.add('hidden');
+        }
     });
 
     // Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             previewModal.classList.add('hidden');
-            googleModal.classList.add('hidden');
         }
     });
 }

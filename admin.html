@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Control Center | Wallpaper Aura</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Distinct Font for Admin: JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="page-admin">
     <!-- Navbar -->
     <header class="navbar">
         <div class="nav-container">
@@ -20,10 +21,6 @@
             </a>
 
             <div class="nav-actions">
-                <a href="index.html" class="nav-tab-btn">
-                    <i class="fa-solid fa-compass"></i>
-                    <span>Explore</span>
-                </a>
                 <a href="profile.html" class="nav-tab-btn">
                     <i class="fa-solid fa-user"></i>
                     <span>Profile</span>
@@ -103,27 +100,32 @@
                 </div>
             </div>
 
-            <!-- Google OAuth Client ID & Setup Guide -->
+            <!-- Google OAuth Credentials & Setup Guide -->
             <div class="admin-box-card">
-                <h3><i class="fa-brands fa-google" style="color:#4285F4"></i> Google OAuth Client ID (Sign-In Key)</h3>
-                <p class="box-desc">Link your real Google OAuth 2.0 Client ID from Google Cloud Console.</p>
+                <h3><i class="fa-brands fa-google" style="color:#4285F4"></i> Google OAuth 2.0 Credentials</h3>
+                <p class="box-desc">Link your real Google OAuth 2.0 Client ID and Secret from Google Cloud Console.</p>
                 
-                <form id="googleClientIdForm" class="inline-form">
-                    <input type="text" id="googleClientIdInput" placeholder="Enter your Google Client ID (e.g. 12345...apps.googleusercontent.com)">
-                    <button type="submit" class="btn-inline"><i class="fa-solid fa-save"></i> Save Key</button>
+                <form id="googleClientIdForm" class="inline-form" style="margin-bottom:0.75rem;">
+                    <input type="text" id="googleClientIdInput" placeholder="Google Client ID (e.g. 846229377994...apps.googleusercontent.com)">
+                    <button type="submit" class="btn-inline"><i class="fa-solid fa-save"></i> Save ID</button>
                 </form>
 
-                <details style="font-size:0.8rem; color:var(--text-muted); background:var(--bg-surface); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); cursor:pointer;">
-                    <summary style="font-weight:600; color:var(--text-primary);"><i class="fa-solid fa-circle-info"></i> How to get your Google Client ID from Google Cloud Console</summary>
+                <form id="googleClientSecretForm" class="inline-form">
+                    <input type="password" id="googleClientSecretInput" placeholder="Google Client Secret (e.g. GOCSPX-...)">
+                    <button type="submit" class="btn-inline"><i class="fa-solid fa-key"></i> Save Secret</button>
+                </form>
+
+                <details style="font-size:0.8rem; color:var(--text-muted); background:var(--bg-surface); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); cursor:pointer; margin-top:0.75rem;">
+                    <summary style="font-weight:600; color:var(--text-primary);"><i class="fa-solid fa-circle-info"></i> Google Cloud Console Configuration Guide</summary>
                     <ol style="margin-top:0.6rem; margin-left:1.2rem; line-height:1.7;">
                         <li>Go to <a href="https://console.cloud.google.com/" target="_blank" style="color:var(--accent-blue);">Google Cloud Console</a>.</li>
-                        <li>Create a new project (e.g. <strong>Wallpaper Aura</strong>).</li>
-                        <li>Go to <strong>APIs & Services</strong> &rarr; <strong>OAuth consent screen</strong>, select <em>External</em>, fill App Name & Email.</li>
+                        <li>Create a project (e.g. <strong>Wallpaper Aura</strong>).</li>
+                        <li>Go to <strong>APIs & Services</strong> &rarr; <strong>OAuth consent screen</strong> &rarr; fill details.</li>
                         <li>Go to <strong>Credentials</strong> &rarr; <strong>Create Credentials</strong> &rarr; <strong>OAuth Client ID</strong> (Web Application).</li>
-                        <li>Under <strong>Authorized JavaScript origins</strong>, add your domains:
-                            <br><code>http://localhost:3000</code> and your Vercel URL (e.g. <code>https://wallpaper-aura.vercel.app</code>).
+                        <li>Under <strong>Authorized JavaScript origins</strong>, add:
+                            <br><code>https://wallpaper-aura.vercel.app</code> and <code>http://localhost:3000</code>.
                         </li>
-                        <li>Copy the generated <strong>Client ID</strong> and paste it above!</li>
+                        <li>Save your generated <strong>Client ID</strong> and <strong>Client Secret</strong> here.</li>
                     </ol>
                 </details>
             </div>
@@ -212,8 +214,10 @@
             });
 
             function renderAdminData() {
-                // Google Client ID
+                // Google Client ID & Secret
                 document.getElementById('googleClientIdInput').value = DB.getGoogleClientId();
+                const secretInput = document.getElementById('googleClientSecretInput');
+                if (secretInput) secretInput.value = DB.getGoogleClientSecret();
 
                 // Render Categories
                 const catList = document.getElementById('categoriesList');
@@ -319,6 +323,14 @@
                 const key = document.getElementById('googleClientIdInput').value.trim();
                 DB.setGoogleClientId(key);
                 alert('Google OAuth Client ID saved successfully!');
+            });
+
+            // Save Google Client Secret
+            document.getElementById('googleClientSecretForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const secret = document.getElementById('googleClientSecretInput').value.trim();
+                DB.setGoogleClientSecret(secret);
+                alert('Google OAuth Client Secret saved successfully!');
             });
 
             // Add Category Form
