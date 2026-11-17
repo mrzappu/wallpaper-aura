@@ -1,7 +1,7 @@
 /**
  * WALLPAPER AURA - DATABASE & STATE LAYER (db.js)
  * Manages database persistence via psycho.db.json & localStorage.
- * Supports dynamic categories, dynamic resolutions, Google OAuth, and download history.
+ * Linked with Google OAuth Client ID: 846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com
  */
 
 const DB = {
@@ -11,7 +11,7 @@ const DB = {
 
     data: {
         siteName: "Wallpaper Aura",
-        googleClientId: "",
+        googleClientId: "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com",
         categories: [
             "Nature", "Minimalist", "Dark", "Anime", "Gaming", "Cars", "Abstract", "Architecture"
         ],
@@ -36,16 +36,9 @@ const DB = {
         if (local) {
             try {
                 this.data = JSON.parse(local);
-                if (!this.data.resolutions || this.data.resolutions.length === 0) {
-                    this.data.resolutions = [
-                        { label: "4K Ultra HD", dimensions: "3840 x 2160", badge: "4K" },
-                        { label: "8K Ultra HD", dimensions: "7680 x 4320", badge: "8K" },
-                        { label: "2K QHD", dimensions: "2560 x 1440", badge: "2K" },
-                        { label: "Full HD 1080p", dimensions: "1920 x 1080", badge: "1080p" },
-                        { label: "Mobile AMOLED", dimensions: "1080 x 2400", badge: "Mobile" },
-                        { label: "Ultrawide (21:9)", dimensions: "3440 x 1440", badge: "UW" }
-                    ];
-                }
+                // Ensure latest Client ID is always set
+                this.data.googleClientId = "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
+                this.save();
                 return;
             } catch (e) {
                 console.error('Error parsing localStorage DB', e);
@@ -57,13 +50,15 @@ const DB = {
             const res = await fetch('psycho.db.json');
             if (res.ok) {
                 this.data = await res.json();
+                this.data.googleClientId = "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
                 this.save();
                 return;
             }
         } catch (e) {
-            console.warn('Fallback to embedded seed data');
+            console.warn('Using embedded state');
         }
 
+        this.data.googleClientId = "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
         this.save();
     },
 
@@ -73,7 +68,7 @@ const DB = {
 
     // Site Config & Google Key
     getGoogleClientId() {
-        return this.data.googleClientId || '';
+        return this.data.googleClientId || "846229377994-vvamqu7r8lfq5ua7bkflir1aq8q6n2iv.apps.googleusercontent.com";
     },
 
     setGoogleClientId(id) {

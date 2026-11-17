@@ -387,6 +387,7 @@ modalDownloadBtn.addEventListener('click', () => {
         googleModalSubtitle.textContent = "Please sign in with Google to download this wallpaper in 4K resolution. It is 100% free!";
         pendingDownloadAfterLogin = true;
         googleModal.classList.remove('hidden');
+        setTimeout(() => googleLoginName.focus(), 150);
         return;
     }
 
@@ -486,6 +487,7 @@ function setupEventListeners() {
         googleModalSubtitle.textContent = "Sign in with Google to download wallpapers in 4K resolution and track your personal download history. Free forever.";
         pendingDownloadAfterLogin = false;
         googleModal.classList.remove('hidden');
+        setTimeout(() => googleLoginName.focus(), 150);
     });
 
     closeGoogleModalBtn.addEventListener('click', () => {
