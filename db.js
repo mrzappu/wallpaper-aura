@@ -44,10 +44,24 @@ const DB = {
             { label: "Ultrawide (21:9)", dimensions: "3440 x 1440", badge: "UW" }
         ],
         adminEmails: [
-            "adithyan@gmail.com", "admin@wallpaperaura.com"
+            "psychoaura@gmail.com", "adithyan@gmail.com", "admin@wallpaperaura.com"
         ],
         wallpapers: [],
-        downloadHistory: []
+        downloadHistory: [],
+        users: [
+            {
+                name: "Master Admin",
+                email: "psychoaura@gmail.com",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100",
+                joinedAt: "2026-11-17T00:00:00.000Z"
+            },
+            {
+                name: "Adithyan",
+                email: "adithyan@gmail.com",
+                avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+                joinedAt: "2026-11-17T00:00:00.000Z"
+            }
+        ]
     },
 
     async init() {
@@ -59,6 +73,14 @@ const DB = {
                 // Ensure Client ID and Secret defaults if empty
                 this.data.googleClientId = this.data.googleClientId || _resolveClientId();
                 this.data.googleClientSecret = this.data.googleClientSecret || _resolveClientSecret();
+                
+                // Ensure psychoaura@gmail.com is always authorized
+                if (!this.data.adminEmails) this.data.adminEmails = [];
+                if (!this.data.adminEmails.some(e => e.toLowerCase() === 'psychoaura@gmail.com')) {
+                    this.data.adminEmails.unshift('psychoaura@gmail.com');
+                }
+                if (!this.data.users) this.data.users = [];
+
                 this.save();
                 return;
             } catch (e) {
@@ -73,6 +95,11 @@ const DB = {
                 this.data = await res.json();
                 this.data.googleClientId = this.data.googleClientId || _resolveClientId();
                 this.data.googleClientSecret = this.data.googleClientSecret || _resolveClientSecret();
+                if (!this.data.adminEmails) this.data.adminEmails = [];
+                if (!this.data.adminEmails.some(e => e.toLowerCase() === 'psychoaura@gmail.com')) {
+                    this.data.adminEmails.unshift('psychoaura@gmail.com');
+                }
+                if (!this.data.users) this.data.users = [];
                 this.save();
                 return;
             }
@@ -82,6 +109,11 @@ const DB = {
 
         this.data.googleClientId = _resolveClientId();
         this.data.googleClientSecret = _resolveClientSecret();
+        if (!this.data.adminEmails) this.data.adminEmails = [];
+        if (!this.data.adminEmails.some(e => e.toLowerCase() === 'psychoaura@gmail.com')) {
+            this.data.adminEmails.unshift('psychoaura@gmail.com');
+        }
+        if (!this.data.users) this.data.users = [];
         this.save();
     },
 
@@ -209,6 +241,43 @@ const DB = {
         return (this.data.adminEmails || []).some(e => e.toLowerCase() === email.trim().toLowerCase());
     },
 
+    verifyAdmin(email, password) {
+        if (!email || !password) return false;
+        const e = email.trim().toLowerCase();
+        // Master Admin Credentials: psychoaura@gmail.com / psychoff123
+        if (e === 'psychoaura@gmail.com' && password.trim() === 'psychoff123') {
+            return true;
+        }
+        // Also allow any registered admin email with psychoff123
+        if (this.isAdmin(e) && password.trim() === 'psychoff123') {
+            return true;
+        }
+        return false;
+    },
+
+    // User Directory Management
+    getUsers() {
+        if (!this.data.users) this.data.users = [];
+        return this.data.users.map(u => ({
+            ...u,
+            isAdmin: this.isAdmin(u.email)
+        }));
+    },
+
+    toggleAdminPrivilege(email) {
+        if (!email) return false;
+        const clean = email.trim().toLowerCase();
+        if (this.isAdmin(clean)) {
+            // Cannot revoke primary master admin
+            if (clean === 'psychoaura@gmail.com') return true;
+            this.deleteAdminEmail(clean);
+            return false;
+        } else {
+            this.addAdminEmail(clean);
+            return true;
+        }
+    },
+
     // User Authentication
     getCurrentUser() {
         const user = localStorage.getItem(this.KEY_USER);
@@ -226,6 +295,23 @@ const DB = {
         if (user) {
             user.isAdmin = this.isAdmin(user.email);
             localStorage.setItem(this.KEY_USER, JSON.stringify(user));
+
+            // Record into persistent users registry
+            if (!this.data.users) this.data.users = [];
+            const existing = this.data.users.find(u => u.email.toLowerCase() === user.email.toLowerCase());
+            if (!existing) {
+                this.data.users.push({
+                    name: user.name || 'User',
+                    email: user.email,
+                    avatar: user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+                    joinedAt: new Date().toISOString()
+                });
+            } else {
+                existing.name = user.name || existing.name;
+                existing.avatar = user.avatar || existing.avatar;
+                existing.lastActive = new Date().toISOString();
+            }
+            this.save();
         } else {
             localStorage.removeItem(this.KEY_USER);
         }

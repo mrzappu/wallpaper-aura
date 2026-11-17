@@ -29,21 +29,55 @@
                     <i class="fa-solid fa-arrow-up-from-bracket"></i>
                     <span>Upload 4K</span>
                 </a>
+                <button class="btn-secondary" id="adminLogoutBtn" style="padding:0.45rem 0.9rem; font-size:0.82rem; cursor:pointer;" title="Sign out of Admin session">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Admin Access Guard (Shown if not admin) -->
-    <div id="accessDeniedBox" class="main-container hidden" style="max-width: 600px; padding-top: 5rem; text-align: center;">
-        <div class="admin-box-card" style="padding: 3rem 2rem;">
-            <i class="fa-solid fa-shield-halved" style="font-size: 3rem; color: var(--accent-red); margin-bottom: 1rem;"></i>
-            <h2 style="font-family: var(--font-heading); margin-bottom: 0.5rem;">Admin Access Required</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                This page is restricted to authorized Wallpaper Aura administrators. Please sign in with an admin Google account.
-            </p>
-            <div style="display: flex; gap: 0.75rem; justify-content: center;">
-                <a href="index.html" class="btn-secondary" style="text-decoration: none;">Return to Home</a>
-                <button class="btn-primary" id="promptLoginBtn">Sign In with Google</button>
+    <!-- Admin Access Guard & Secret Admin Login Card -->
+    <div id="accessDeniedBox" class="main-container hidden" style="max-width: 500px; padding-top: 4rem;">
+        <div class="admin-box-card" style="padding: 2.5rem 2rem; border: 1px solid rgba(139, 92, 246, 0.4); box-shadow: 0 10px 40px -10px rgba(139, 92, 246, 0.25);">
+            <div style="text-align: center; margin-bottom: 1.75rem;">
+                <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:rgba(139, 92, 246, 0.15); border:1px solid rgba(139, 92, 246, 0.4); margin-bottom:1rem;">
+                    <i class="fa-solid fa-shield-halved" style="font-size: 1.8rem; color: var(--accent-violet);"></i>
+                </div>
+                <h2 style="font-family: var(--font-heading); font-size:1.6rem; margin-bottom: 0.4rem;">Admin Control Login</h2>
+                <p style="color: var(--text-secondary); font-size:0.88rem;">
+                    Restricted console. Enter administrator email and master password to proceed.
+                </p>
+            </div>
+
+            <form id="adminLoginForm" novalidate style="display:flex; flex-direction:column; gap:1.2rem;">
+                <div class="login-form-group">
+                    <label for="adminLoginEmail" style="font-size:0.82rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">
+                        <i class="fa-solid fa-envelope"></i> Admin Email
+                    </label>
+                    <input type="email" id="adminLoginEmail" placeholder="psychoaura@gmail.com" required style="width:100%; padding:0.75rem 1rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); color:#fff; font-family:var(--font-admin); outline:none;">
+                </div>
+
+                <div class="login-form-group">
+                    <label for="adminLoginPassword" style="font-size:0.82rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">
+                        <i class="fa-solid fa-key"></i> Master Password
+                    </label>
+                    <input type="password" id="adminLoginPassword" placeholder="Enter password" required style="width:100%; padding:0.75rem 1rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); color:#fff; font-family:var(--font-admin); outline:none;">
+                </div>
+
+                <div id="adminLoginError" class="hidden" style="color:#fb7185; background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); padding:0.6rem 0.8rem; border-radius:var(--radius-sm); font-size:0.82rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="adminLoginErrorText">Invalid admin credentials.</span>
+                </div>
+
+                <button type="submit" id="adminLoginSubmitBtn" class="btn-primary" style="width:100%; justify-content:center; padding:0.85rem; font-weight:700; font-size:0.95rem; cursor:pointer;">
+                    <i class="fa-solid fa-lock-open"></i> Authenticate & Enter
+                </button>
+            </form>
+
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.82rem; display:inline-flex; align-items:center; gap:0.4rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Return to Gallery
+                </a>
             </div>
         </div>
     </div>
@@ -146,6 +180,38 @@
             </div>
         </div>
 
+        <!-- User Management & Admin Access Permissions -->
+        <div class="admin-table-card" style="margin-bottom: 2.5rem;">
+            <div class="table-header-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:0.2rem;">
+                        <i class="fa-solid fa-users-gear" style="color:var(--accent-violet)"></i> Registered Users & Admin Access
+                    </h3>
+                    <span class="box-desc" style="margin-bottom:0;">Search users and grant or revoke full administrator privileges (grants top Admin Panel access).</span>
+                </div>
+                <div style="position:relative; min-width:260px;">
+                    <input type="text" id="userSearchInput" placeholder="Search users by name or email..." style="width:100%; padding:0.55rem 1rem 0.55rem 2.2rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-full); color:#fff; font-size:0.85rem; outline:none;">
+                    <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:0.85rem; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.8rem;"></i>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email Address</th>
+                            <th>Role & Access</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Inventory Table -->
         <div class="admin-table-card">
             <div class="table-header-bar">
@@ -193,27 +259,129 @@
                 if (!isAuthorized) {
                     accessDeniedBox.classList.remove('hidden');
                     adminContent.classList.add('hidden');
+                    document.getElementById('adminLogoutBtn')?.classList.add('hidden');
                 } else {
                     accessDeniedBox.classList.add('hidden');
                     adminContent.classList.remove('hidden');
+                    document.getElementById('adminLogoutBtn')?.classList.remove('hidden');
                     renderAdminData();
                 }
             }
 
-            document.getElementById('promptLoginBtn')?.addEventListener('click', () => {
-                const name = prompt('Enter your name:');
-                const email = prompt('Enter your Google email:');
-                if (email) {
+            // Secret Master Admin Login Handler (psychoaura@gmail.com / psychoff123)
+            const adminLoginForm = document.getElementById('adminLoginForm');
+            const adminLoginError = document.getElementById('adminLoginError');
+            const adminLoginErrorText = document.getElementById('adminLoginErrorText');
+
+            adminLoginForm?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('adminLoginEmail').value.trim();
+                const pass = document.getElementById('adminLoginPassword').value;
+
+                if (DB.verifyAdmin(email, pass)) {
+                    adminLoginError?.classList.add('hidden');
+                    const normalizedEmail = email.toLowerCase();
                     DB.setCurrentUser({
-                        name: name || 'Admin',
-                        email: email,
+                        name: normalizedEmail === 'psychoaura@gmail.com' ? 'Master Admin' : normalizedEmail.split('@')[0],
+                        email: normalizedEmail,
                         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
                     });
                     checkAccess();
+                } else {
+                    if (adminLoginError) {
+                        adminLoginError.classList.remove('hidden');
+                        adminLoginError.style.display = 'flex';
+                        if (adminLoginErrorText) adminLoginErrorText.textContent = 'Invalid admin email or master password. Access denied.';
+                    }
                 }
             });
 
+            // Logout button
+            document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+                DB.logout();
+                window.location.href = 'index.html';
+            });
+
+            // User Search Input Listener
+            document.getElementById('userSearchInput')?.addEventListener('input', () => {
+                renderUsers();
+            });
+
+            function renderUsers() {
+                const tbody = document.getElementById('usersTableBody');
+                if (!tbody) return;
+                const allUsers = DB.getUsers();
+                const query = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
+
+                const filtered = allUsers.filter(u => {
+                    if (!query) return true;
+                    return (u.name || '').toLowerCase().includes(query) || (u.email || '').toLowerCase().includes(query);
+                });
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-muted);">No matching registered users found.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = filtered.map(u => {
+                    const isAdmin = DB.isAdmin(u.email);
+                    const isMaster = u.email.toLowerCase() === 'psychoaura@gmail.com';
+                    return `
+                        <tr>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:0.75rem;">
+                                    <img src="${u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80'}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid var(--border-subtle);">
+                                    <strong style="color:var(--text-primary);">${u.name || 'User'}</strong>
+                                </div>
+                            </td>
+                            <td style="color:var(--text-secondary); font-family:var(--font-admin); font-size:0.85rem;">${u.email}</td>
+                            <td>
+                                ${isAdmin 
+                                    ? `<span class="admin-badge" style="background:rgba(139,92,246,0.15); color:var(--accent-lavender); border-color:rgba(139,92,246,0.3);"><i class="fa-solid fa-crown" style="color:#f59e0b;"></i> ${isMaster ? 'Master Admin' : 'Administrator'}</span>`
+                                    : `<span style="background:rgba(255,255,255,0.05); color:var(--text-muted); padding:0.25rem 0.65rem; border-radius:var(--radius-full); font-size:0.78rem;">Member</span>`
+                                }
+                            </td>
+                            <td>
+                                ${isMaster 
+                                    ? `<span style="color:var(--text-muted); font-size:0.78rem; font-style:italic;">Primary Master</span>`
+                                    : isAdmin
+                                        ? `<button class="btn-revoke-admin" data-email="${u.email}" style="padding:0.4rem 0.85rem; background:rgba(244,63,94,0.12); color:#fb7185; border:1px solid rgba(244,63,94,0.3); border-radius:var(--radius-sm); cursor:pointer; font-size:0.78rem; font-weight:600;" title="Revoke Admin Access">
+                                            <i class="fa-solid fa-user-xmark"></i> Revoke Admin
+                                           </button>`
+                                        : `<button class="btn-grant-admin" data-email="${u.email}" style="padding:0.4rem 0.85rem; background:var(--accent-violet); color:#fff; border:none; border-radius:var(--radius-sm); cursor:pointer; font-size:0.78rem; font-weight:600;" title="Grant Full Admin Access">
+                                            <i class="fa-solid fa-user-shield"></i> Grant Admin Access
+                                           </button>`
+                                }
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                tbody.querySelectorAll('.btn-grant-admin').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const email = btn.dataset.email;
+                        DB.addAdminEmail(email);
+                        renderUsers();
+                        renderAdminData();
+                        alert(`Admin privileges granted to ${email}! They will now see the top Admin Panel and Upload buttons.`);
+                    });
+                });
+
+                tbody.querySelectorAll('.btn-revoke-admin').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const email = btn.dataset.email;
+                        if (confirm(`Revoke admin access from ${email}?`)) {
+                            DB.deleteAdminEmail(email);
+                            renderUsers();
+                            renderAdminData();
+                        }
+                    });
+                });
+            }
+
             function renderAdminData() {
+                renderUsers();
+
                 // Google Client ID & Secret
                 document.getElementById('googleClientIdInput').value = DB.getGoogleClientId();
                 const secretInput = document.getElementById('googleClientSecretInput');

@@ -59,17 +59,21 @@
         <form id="standaloneLoginForm" novalidate>
             <div class="login-form-group">
                 <label for="loginUserName">Enter Your Name</label>
-                <input type="text" id="loginUserName" placeholder="Your Name (e.g. Adithyan)" value="Adithyan" autofocus>
+                <input type="text" id="loginUserName" placeholder="Enter your full name" autofocus autocomplete="name">
             </div>
 
             <div class="login-form-group">
-                <label for="loginUserEmail">Google Email (Optional)</label>
-                <input type="email" id="loginUserEmail" placeholder="Your Google email" value="adithyan@gmail.com">
+                <label for="loginUserEmail">Google Email</label>
+                <input type="email" id="loginUserEmail" placeholder="Enter your Google email (e.g. yourname@gmail.com)" autocomplete="email">
             </div>
 
             <button type="submit" id="submitLoginBtn" class="btn-login-submit">
                 <i class="fa-brands fa-google"></i>
-                <span>Continue with Google</span>
+                <span>Sign In to Wallpaper Aura</span>
+            </button>
+
+            <button type="button" id="quickOneClickBtn" class="btn-secondary" style="width:100%; margin-top:0.75rem; justify-content:center; padding:0.7rem 1rem; font-size:0.85rem;">
+                <i class="fa-solid fa-bolt" style="color:var(--accent-lavender)"></i> Quick Sign In
             </button>
         </form>
 
@@ -105,7 +109,6 @@
                                         email: payload.email || 'user@gmail.com',
                                         avatar: payload.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
                                     });
-                                    alert('Signed in as ' + (payload.name || 'Google User') + '!');
                                     window.location.href = 'index.html';
                                 } catch(e) { console.error(e); }
                             }
@@ -137,24 +140,31 @@
                 }, 250);
             }
 
-            // Standalone form login (Impossible to fail, never blocks on validation)
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                let name = nameInput.value.trim() || 'Adithyan';
-                let email = emailInput.value.trim().toLowerCase();
-                if (!email || !email.includes('@')) {
-                    email = name.toLowerCase().replace(/[^a-z0-9]/g, '') + '@gmail.com';
+            function completeLogin(name, email) {
+                const finalName = name || 'Adithyan';
+                let finalEmail = (email || '').trim().toLowerCase();
+                if (!finalEmail || !finalEmail.includes('@')) {
+                    finalEmail = finalName.toLowerCase().replace(/[^a-z0-9]/g, '') + '@gmail.com';
                 }
 
                 const user = {
-                    name: name,
-                    email: email,
+                    name: finalName,
+                    email: finalEmail,
                     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
                 };
 
                 DB.setCurrentUser(user);
-                alert(`Welcome, ${user.name}! You are now signed in.`);
                 window.location.href = 'index.html';
+            }
+
+            // Standalone form login (Impossible to fail, never blocks on validation)
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                completeLogin(nameInput.value.trim(), emailInput.value.trim());
+            });
+
+            document.getElementById('quickOneClickBtn')?.addEventListener('click', () => {
+                completeLogin(nameInput.value.trim() || 'Adithyan', emailInput.value.trim());
             });
         });
     </script>

@@ -35,6 +35,12 @@
 
             <!-- Navigation Links (Explore button removed as requested) -->
             <div class="nav-actions">
+                <!-- Admin Panel Button: Visible ONLY to Admins -->
+                <a href="admin.html" class="nav-tab-btn hidden" id="navAdminBtn" title="Admin Control Center" style="border: 1px solid rgba(139,92,246,0.4); background: rgba(139,92,246,0.12); color: #c084fc;">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Admin Panel</span>
+                </a>
+
                 <!-- Upload 4K Button: Visible ONLY to Admins -->
                 <a href="upload.html" class="upload-btn hidden" id="adminUploadBtn" title="Admin Wallpaper Upload">
                     <i class="fa-solid fa-arrow-up-from-bracket"></i>
@@ -233,8 +239,7 @@
             </div>
             <div class="footer-links">
                 <a href="login.html" style="color:var(--text-secondary);text-decoration:none;margin-right:1rem;">Sign In</a>
-                <a href="profile.html" style="color:var(--text-secondary);text-decoration:none;margin-right:1rem;">Profile</a>
-                <a href="admin.html" id="footerAdminLink" style="color:var(--text-muted);text-decoration:none;">Admin</a>
+                <a href="profile.html" style="color:var(--text-secondary);text-decoration:none;">Profile</a>
             </div>
             <div>&copy; 2026 Wallpaper Aura. All rights reserved.</div>
         </div>

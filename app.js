@@ -78,6 +78,8 @@ function setupAuthUI() {
     const userSavedStatus = document.getElementById('userSavedStatus');
     const modalAccountName = document.getElementById('modalAccountName');
 
+    const navAdminBtn = document.getElementById('navAdminBtn');
+
     if (user) {
         if (googleLoginBtn) googleLoginBtn.classList.add('hidden');
         if (userProfilePill) userProfilePill.classList.remove('hidden');
@@ -87,10 +89,14 @@ function setupAuthUI() {
         const isAdmin = DB.isAdmin(user.email);
         if (userRoleBadge) userRoleBadge.textContent = isAdmin ? 'Admin' : 'Member';
 
-        // Only show Upload button if user is Admin!
+        // Show Admin Panel & Upload button ONLY if user is Admin!
         if (adminUploadBtn) {
             if (isAdmin) adminUploadBtn.classList.remove('hidden');
             else adminUploadBtn.classList.add('hidden');
+        }
+        if (navAdminBtn) {
+            if (isAdmin) navAdminBtn.classList.remove('hidden');
+            else navAdminBtn.classList.add('hidden');
         }
 
         if (saveSuggestionPopup) saveSuggestionPopup.classList.add('hidden');
@@ -100,6 +106,7 @@ function setupAuthUI() {
         if (googleLoginBtn) googleLoginBtn.classList.remove('hidden');
         if (userProfilePill) userProfilePill.classList.add('hidden');
         if (adminUploadBtn) adminUploadBtn.classList.add('hidden');
+        if (navAdminBtn) navAdminBtn.classList.add('hidden');
         if (saveSuggestionPopup) saveSuggestionPopup.classList.remove('hidden');
         if (userSavedStatus) userSavedStatus.classList.add('hidden');
     }

@@ -3,6 +3,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "routes": [
+    { "src": "/login", "dest": "/login.html" },
     { "src": "/upload", "dest": "/upload.html" },
     { "src": "/profile", "dest": "/profile.html" },
     { "src": "/admin", "dest": "/admin.html" },
